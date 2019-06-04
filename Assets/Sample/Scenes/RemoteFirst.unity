@@ -152,7 +152,8 @@ GameObject:
   m_Component:
   - component: {fileID: 553250003}
   m_Layer: 0
-  m_Name: 0.Confirm Simulation Mode is switch off
+  m_Name: 0.Run Asset > AssetBundles > Build AssetBundles, and switch off Simulation
+    Mode
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
