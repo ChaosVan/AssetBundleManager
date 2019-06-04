@@ -12,3 +12,5 @@
 /.vs
 *.sln
 *.csproj
+
+/AssetBundles/

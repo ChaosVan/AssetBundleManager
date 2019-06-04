@@ -12,4 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 296266ea8be8d41fb82ccbae3aca4f60, type: 3}
   m_Name: AssetBundleNamesSetting
   m_EditorClassIdentifier: 
-  list: []
+  list:
+  - name: assets/sample/atlas
+    variant: bundle
+    path: Assets/Sample/Atlas
+    separated: 1
+    ignore: 
+  - name: assets/sample/prefabs
+    variant: bundle
+    path: Assets/Sample/Prefabs/HD
+    separated: 1
+    ignore: 
+  - name: assets/sample/prefabs
+    variant: bundle-sd
+    path: Assets/Sample/Prefabs/SD
+    separated: 1
+    ignore: 
