@@ -1,0 +1,10 @@
+{
+	"name": "com.chaosvan.assetbundle-manager",
+	"displayName": "Asset Bundle Manager",
+	"version": "1.0.0",
+	"unity": "2018.1",
+	"author": "ChaosVan",
+	"license": "MIT",
+	"description": "Use Asset Bundle Manager to manage assetbundles in project.\n\nThe Asset Bundle Manager is improved from Unity AssetBundleManager.",
+	"dependencies": {}
+}
