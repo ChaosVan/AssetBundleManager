@@ -565,6 +565,9 @@ namespace AssetBundles
                         m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle, refCount));
                     else
                         m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle));
+
+                    if (m_DownloadingErrors.ContainsKey(key))
+                        m_DownloadingErrors.Remove(key);
 #if UNITY_EDITOR
                     isDirty = true;
 #endif
@@ -608,6 +611,9 @@ namespace AssetBundles
                             m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle, refCount));
                         else
                             m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle));
+
+                        if (m_DownloadingErrors.ContainsKey(key))
+                            m_DownloadingErrors.Remove(key);
 #if UNITY_EDITOR
                         isDirty = true;
 #endif
@@ -677,6 +683,9 @@ namespace AssetBundles
                             m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle, refCount));
                         else
                             m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle));
+
+                        if (m_DownloadingErrors.ContainsKey(key))
+                            m_DownloadingErrors.Remove(key);
 #if UNITY_EDITOR
                         isDirty = true;
 #endif
