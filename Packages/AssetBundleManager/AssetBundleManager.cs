@@ -494,6 +494,9 @@ namespace AssetBundles
             UnloadAssetBundleInternal(assetBundleName);
             UnloadDependencies(assetBundleName);
 
+            if (m_DownloadingErrors.ContainsKey(assetBundleName))
+                m_DownloadingErrors.Remove(assetBundleName);
+
             //Log(LogType.Info, m_LoadedAssetBundles.Count + " assetbundle(s) in memory after unloading " + assetBundleName);
         }
 
