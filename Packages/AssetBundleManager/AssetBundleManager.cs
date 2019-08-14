@@ -292,13 +292,20 @@ namespace AssetBundles
             {
                 string[] curSplit = bundlesWithVariant[i].Split('.');
 
-                if (m_AllAssetBundlesWithVariant.ContainsKey(curSplit[0]))
+                if (curSplit.Length > 1)
                 {
-                    m_AllAssetBundlesWithVariant[curSplit[0]].Add(curSplit[1]);
+                    if (m_AllAssetBundlesWithVariant.ContainsKey(curSplit[0]))
+                    {
+                        m_AllAssetBundlesWithVariant[curSplit[0]].Add(curSplit[1]);
+                    }
+                    else
+                    {
+                        m_AllAssetBundlesWithVariant[curSplit[0]] = new List<string> { curSplit[1] };
+                    }
                 }
                 else
                 {
-                    m_AllAssetBundlesWithVariant[curSplit[0]] = new List<string> { curSplit[1] };
+                    Log(LogType.Error, bundlesWithVariant[i] + " has no variant name");
                 }
             }
         }
