@@ -606,7 +606,7 @@ namespace AssetBundles
                     {
                         if (loadMode == LoadMode.LocalFirst)
                         {
-                            Log(LogType.Info, string.Format("No asset in local {0}, try remote {1}: {2}", BaseLocalURL, BaseDownloadingURL, key));
+                            Log(LogType.Info, string.Format("No asset[{2}] in local {0}, try remote {1}", BaseLocalURL, BaseDownloadingURL, key));
                             LoadAssetBundleInternal(key, m_AssetBundleManifest == null, LoadMode.Remote, refCount);
                         }
                         else
@@ -661,7 +661,7 @@ namespace AssetBundles
                     {
                         if (loadMode == LoadMode.RemoteFirst)
                         {
-                            Log(LogType.Info, string.Format("No asset in remote {0}, try local {1}: {2}", BaseDownloadingURL, BaseLocalURL, key));
+                            Log(LogType.Info, string.Format("No asset[{2}] in remote {0}, try local {1}", BaseDownloadingURL, BaseLocalURL, key));
                             LoadAssetBundleInternal(key, m_AssetBundleManifest == null, LoadMode.Local, refCount);
                         }
                         else

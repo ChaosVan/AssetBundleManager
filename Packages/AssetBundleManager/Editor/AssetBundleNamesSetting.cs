@@ -22,6 +22,7 @@ namespace AssetBundles
         public string path;
         public bool separated;
         public string ignore;
+        public string comment;
 
 #if ODIN_INSPECTOR
         [Button(ButtonSizes.Small), ButtonGroup]

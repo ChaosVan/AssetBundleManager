@@ -33,15 +33,20 @@ namespace AssetBundles
             }
         }
 
-        static void ValidateAssetBundle(string bundleName, ref List<string> errList)
+        static void ValidateAssetBundle(string bundleName, ref Dictionary<string, string> errors)
         {
             string path = Utility.GetStreamingAssetsDirectory();
             string bundlePath = Path.Combine(path, bundleName);
-            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
-            if (bundle != null)
-                bundle.Unload(true);
-            else
-                errList.Add(bundleName);
+
+            try
+            {
+                AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
+                if (bundle != null)
+                    bundle.Unload(true);
+            } catch (System.Exception e)
+            {
+                errors.Add(bundleName, e.Message);
+            }
         }
 
         public static bool ValidateAssetBundles()
@@ -49,8 +54,8 @@ namespace AssetBundles
             string path = Utility.GetStreamingAssetsDirectory();
             Debug.LogFormat("AssetBundle Path = {0}", path);
 
-            List<string> errBundles = new List<string>();
-            ValidateAssetBundle(Utility.GetPlatformName(), ref errBundles);
+            Dictionary<string, string> errors = new Dictionary<string, string>();
+            ValidateAssetBundle(Utility.GetPlatformName(), ref errors);
 
             string[] bundles = AssetDatabase.GetAllAssetBundleNames();
             float p = 0;
@@ -58,17 +63,17 @@ namespace AssetBundles
             {
                 if (!Application.isBatchMode)
                     EditorUtility.DisplayProgressBar("ValidateAssetBundles", bundleName, p++ * 1f / bundles.Length);
-                ValidateAssetBundle(bundleName, ref errBundles);
+                ValidateAssetBundle(bundleName, ref errors);
             }
 
             if (!Application.isBatchMode)
                 EditorUtility.ClearProgressBar();
 
-            if (errBundles.Count > 0)
+            if (errors.Count > 0)
             {
-                foreach (var str in errBundles)
+                foreach (var error in errors)
                 {
-                    Debug.LogErrorFormat("{0} has something err", str);
+                    Debug.LogErrorFormat("[{0}]{1}", error.Key, error.Value);
                 }
                 return false;
             }
