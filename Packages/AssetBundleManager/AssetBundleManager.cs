@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -55,7 +56,7 @@ namespace AssetBundles
     {
         public enum LogMode { All, JustErrors };
         public enum LogType { Info, Warning, Error };
-        public enum LoadMode { Local, Remote, LocalFirst, RemoteFirst };
+        public enum LoadMode { Internal, Local, Remote, LocalFirst, RemoteFirst };
 
         static AssetBundleManifest m_AssetBundleManifest = null;
 
@@ -152,26 +153,26 @@ namespace AssetBundles
         public static void SetLocalAssetBundleDirectory(string path)
         {
             if (string.IsNullOrEmpty(path))
-                BaseLocalURL = Utility.GetStreamingAssetsDirectory();
+                BaseLocalURL = Application.persistentDataPath;
             else
                 BaseLocalURL = path;
 
-            Log(LogType.Info, BaseLocalURL);
+            Log(LogType.Info, "SetLocalAssetBundleDirectory: " + BaseLocalURL);
         }
 
         public static void SetRemoteAssetBundleURL(string url)
         {
             if (string.IsNullOrEmpty(url))
-                BaseDownloadingURL = Application.temporaryCachePath;
+                SetDevelopmentAssetBundleServer();
             else
                 BaseDownloadingURL = url;
 
-            Log(LogType.Info, BaseDownloadingURL);
+            Log(LogType.Info, "SetRemoteAssetBundleURL: " + BaseDownloadingURL);
         }
 
         public static void SetSourceAssetBundleURL(string absolutePath)
         {
-            BaseDownloadingURL = absolutePath + "/";
+            BaseDownloadingURL = absolutePath;
         }
 
         public static void SetDevelopmentAssetBundleServer()
@@ -183,26 +184,46 @@ namespace AssetBundles
 #endif
 
             TextAsset urlFile = Resources.Load("AssetBundleServerURL") as TextAsset;
-            string url = (urlFile != null) ? urlFile.text.Trim() : null;
-            if (url == null || url.Length == 0)
+            string url = urlFile?.text.Trim();
+            if (string.IsNullOrEmpty(url))
             {
-                Log(LogType.Error, "Development Server URL could not be found.");
-                //AssetBundleManager.SetSourceAssetBundleURL("http://localhost:7888/" + UnityHelper.GetPlatformName() + "/");
+                if (loadMode != LoadMode.Local && loadMode != LoadMode.Internal)
+                    Log(LogType.Error, "Development Server URL could not be found.");
             }
             else
             {
-                AssetBundleManager.SetSourceAssetBundleURL(url);
+                SetSourceAssetBundleURL(url);
             }
         }
 
         /// <summary>
-        /// Hases the asset bundle asset.
+        /// Is assetbundle in manifest.
         /// </summary>
         /// <returns><c>true</c>, if asset bundle asset was hased, <c>false</c> otherwise.</returns>
-        /// <param name="assetBundleName">Asset bundle name with variant.</param>
-        public static bool HasAssetBundleAsset(string assetBundleName)
+        /// <param name="assetBundle">Asset bundle name with variant.</param>
+        public static bool HasAssetInternal(string assetBundle)
         {
-            return m_AllAssetBundlesWithVariant.ContainsKey(assetBundleName);
+            return m_AllAssetBundlesWithVariant.ContainsKey(assetBundle);
+        }
+
+        /// <summary>
+        /// Is assetbundle file in local
+        /// </summary>
+        /// <returns><c>true</c>, if asset in local was hased, <c>false</c> otherwise.</returns>
+        /// <param name="assetBundle">Asset bundle.</param>
+        public static bool HasAssetInLocal(string assetBundle, bool useSimulatePath = false)
+        {
+#if UNITY_EDITOR
+            if (useSimulatePath && SimulateAssetBundleInEditor)
+            {
+                return HasAssetInternal(assetBundle);
+            }
+#endif
+            string fullPath = Path.Combine(BaseLocalURL, assetBundle);
+            if (File.Exists(fullPath))
+                return true;
+
+            return false;
         }
 
         public static List<string> GetAllAssetBundleNames()
@@ -404,7 +425,7 @@ namespace AssetBundles
             // But in the real case, users can call LoadAssetAsync()/LoadLevelAsync() several times then wait them to be finished which might have duplicate WWWs.
 
 
-            if (mode == LoadMode.Local || mode == LoadMode.LocalFirst)
+            if (mode == LoadMode.Local || mode == LoadMode.LocalFirst || mode == LoadMode.Internal)
             {
                 if (m_LocalLoadingReferenceCount.ContainsKey(assetBundleName))
                 {
@@ -414,6 +435,10 @@ namespace AssetBundles
                 m_LocalLoadingReferenceCount.Add(assetBundleName, refCount);
 
                 string url = Path.Combine(BaseLocalURL, assetBundleName);
+
+                if (mode == LoadMode.Internal || !HasAssetInLocal(assetBundleName))
+                    url = Path.Combine(Utility.GetStreamingAssetsDirectory(), assetBundleName);
+
                 AssetBundleCreateRequest request = null;
 
                 if (isLoadingAssetBundleManifest)
@@ -421,7 +446,7 @@ namespace AssetBundles
                 else
                     request = AssetBundle.LoadFromFileAsync(url, 0); // TODO CRC校验
 
-                request.priority = (int)ThreadPriority.BelowNormal;
+                request.priority = (int)Application.backgroundLoadingPriority;
 
                 m_CreatingAssetBundles.Add(assetBundleName, request);
             }
@@ -450,11 +475,10 @@ namespace AssetBundles
                     download = UnityWebRequestAssetBundle.GetAssetBundle(url, m_AssetBundleManifest.GetAssetBundleHash(assetBundleName), 0); // TODO CRC校验
 
                 UnityWebRequestAsyncOperation request = download.SendWebRequest();
-                request.priority = (int)ThreadPriority.BelowNormal;
+                request.priority = (int)Application.backgroundLoadingPriority;
 
                 m_UnityWebRequests.Add(assetBundleName, request);
             }
-
 
             return false;
         }
