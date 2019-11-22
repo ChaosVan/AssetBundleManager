@@ -21,8 +21,8 @@ public class Main2 : MonoBehaviour
         AssetBundleManager.loadMode = AssetBundleManager.LoadMode.RemoteFirst;
         AssetBundleManager.logMode = AssetBundleManager.LogMode.All;
 
-        AssetBundleManager.SetRemoteAssetBundleURL("file://" + Application.persistentDataPath);
-        AssetBundleManager.SetLocalAssetBundleDirectory(Utility.GetStreamingAssetsDirectory());
+        AssetBundleManager.SetLocalAssetBundleDirectory(Application.persistentDataPath);
+        AssetBundleManager.SetRemoteAssetBundleURL("file://" + Application.temporaryCachePath);
         AssetBundleManager.ActiveVariants = new string[] { perferVariant };
 
         yield return AssetBundleManager.Initialize();

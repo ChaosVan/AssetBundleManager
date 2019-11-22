@@ -565,49 +565,49 @@ namespace AssetBundles
             Log(LogType.Info, string.Format(UNLOADSTR, assetBundleName, bundle.m_ReferencedCount));
         }
 
-        static void OnRemoteCallback(UnityWebRequest request, string err, object userdata)
-        {
-            string key = userdata as string;
-            if (request.isDone)
-            {
-                int refCount = m_RemoteLoadingReferencedCount[key];
-                m_RemoteLoadingReferencedCount.Remove(key);
+//        static void OnRemoteCallback(UnityWebRequest request, string err, object userdata)
+//        {
+//            string key = userdata as string;
+//            if (request.isDone)
+//            {
+//                int refCount = m_RemoteLoadingReferencedCount[key];
+//                m_RemoteLoadingReferencedCount.Remove(key);
 
-                AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(request);
+//                AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(request);
 
-                if (bundle == null)
-                {
-                    if (loadMode == LoadMode.RemoteFirst)
-                    {
-                        Log(LogType.Info, string.Format("No asset in remote {0}, try local {1}: {2}", BaseDownloadingURL, BaseLocalURL, key));
-                        LoadAssetBundleInternal(key, m_AssetBundleManifest == null, LoadMode.Local, refCount);
-                    }
-                    else
-                    {
-                        if (!m_DownloadingErrors.ContainsKey(key))
-                        {
-                            if (request.isNetworkError || request.isHttpError)
-                                m_DownloadingErrors.Add(key, string.Format("Failed downloading bundle {0} from {1}: {2}", key, request.url, err));
-                            else
-                                m_DownloadingErrors.Add(key, string.Format("{0} is not a valid asset bundle.", key));
-                        }
-                    }
-                }
-                else
-                {
-                    if (refCount > 1)
-                        m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle, refCount));
-                    else
-                        m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle));
+//                if (bundle == null)
+//                {
+//                    if (loadMode == LoadMode.RemoteFirst)
+//                    {
+//                        Log(LogType.Info, string.Format("No asset in remote {0}, try local {1}: {2}", BaseDownloadingURL, BaseLocalURL, key));
+//                        LoadAssetBundleInternal(key, m_AssetBundleManifest == null, LoadMode.Local, refCount);
+//                    }
+//                    else
+//                    {
+//                        if (!m_DownloadingErrors.ContainsKey(key))
+//                        {
+//                            if (request.isNetworkError || request.isHttpError)
+//                                m_DownloadingErrors.Add(key, string.Format("Failed downloading bundle {0} from {1}: {2}", key, request.url, err));
+//                            else
+//                                m_DownloadingErrors.Add(key, string.Format("{0} is not a valid asset bundle.", key));
+//                        }
+//                    }
+//                }
+//                else
+//                {
+//                    if (refCount > 1)
+//                        m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle, refCount));
+//                    else
+//                        m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle));
 
-                    if (m_DownloadingErrors.ContainsKey(key))
-                        m_DownloadingErrors.Remove(key);
-#if UNITY_EDITOR
-                    isDirty = true;
-#endif
-                }
-            }
-        }
+//                    if (m_DownloadingErrors.ContainsKey(key))
+//                        m_DownloadingErrors.Remove(key);
+//#if UNITY_EDITOR
+//                    isDirty = true;
+//#endif
+        //        }
+        //    }
+        //}
 
         void UpdateLocal()
         {
@@ -648,6 +648,8 @@ namespace AssetBundles
 
                         if (m_DownloadingErrors.ContainsKey(key))
                             m_DownloadingErrors.Remove(key);
+
+                        Log(LogType.Info, string.Format("Load [{0}] success from [{1}]", bundle.name, BaseLocalURL));
 #if UNITY_EDITOR
                         isDirty = true;
 #endif
@@ -720,6 +722,8 @@ namespace AssetBundles
 
                         if (m_DownloadingErrors.ContainsKey(key))
                             m_DownloadingErrors.Remove(key);
+
+                        Log(LogType.Info, string.Format("Load [{0}] success from [{1}]", bundle.name, BaseDownloadingURL));
 #if UNITY_EDITOR
                         isDirty = true;
 #endif
