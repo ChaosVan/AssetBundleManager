@@ -9,6 +9,10 @@ using UnityEngine.Networking;
 using UnityEditor;
 #endif
 
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#endif
+
 /*
  	In this demo, we demonstrate:
 	1.	Automatic asset bundle dependency resolving & loading.
@@ -66,21 +70,47 @@ namespace AssetBundles
         static List<string> m_SimulateAssetBundleList = new List<string>();
 #endif
 
+#if ODIN_INSPECTOR
+        [SerializeField]
+        private bool showOdinInfo;
+#endif
+
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
+#endif
         static Dictionary<string, LoadedAssetBundle> m_LoadedAssetBundles = new Dictionary<string, LoadedAssetBundle>();
         static Dictionary<string, UnityWebRequestAsyncOperation> m_UnityWebRequests = new Dictionary<string, UnityWebRequestAsyncOperation>();
         static Dictionary<string, AssetBundleCreateRequest> m_CreatingAssetBundles = new Dictionary<string, AssetBundleCreateRequest>();
 
-
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
+#endif
         static Dictionary<string, string> m_DownloadingErrors = new Dictionary<string, string>();
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
+#endif
         static List<AssetBundleLoadOperation> m_InProgressOperations = new List<AssetBundleLoadOperation>();
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
+#endif
         static Dictionary<string, string[]> m_Dependencies = new Dictionary<string, string[]>();
-
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
+#endif
         static Dictionary<string, int> m_LocalLoadingReferenceCount = new Dictionary<string, int>();
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
+#endif
         static Dictionary<string, int> m_RemoteLoadingReferencedCount = new Dictionary<string, int>();
-
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
+#endif
         static Dictionary<string, List<string>> m_AllAssetBundlesWithVariant = new Dictionary<string, List<string>>();
 
 #if UNITY_EDITOR
+#if ODIN_INSPECTOR
+        [ShowInInspector, HideIf("showOdinInfo"), ListDrawerSettings(IsReadOnly = true)]
+#endif
         public List<LoadedAssetBundle> allLoaded = new List<LoadedAssetBundle>();
         private static bool isDirty;
 #endif
@@ -413,6 +443,11 @@ namespace AssetBundles
         /// <param name="isLoadingAssetBundleManifest">If set to <c>true</c> is loading asset bundle manifest.</param>
         static protected bool LoadAssetBundleInternal(string assetBundleName, bool isLoadingAssetBundleManifest, LoadMode mode, int refCount = 1)
         {
+            // Has error
+            if (m_DownloadingErrors.ContainsKey(assetBundleName))
+            {
+                return true;
+            }
             // Already loaded.
             if (m_LoadedAssetBundles.TryGetValue(assetBundleName, out LoadedAssetBundle bundle))
             {
@@ -424,14 +459,20 @@ namespace AssetBundles
             // In the demo, we never have duplicate WWWs as we wait LoadAssetAsync()/LoadLevelAsync() to be finished before calling another LoadAssetAsync()/LoadLevelAsync().
             // But in the real case, users can call LoadAssetAsync()/LoadLevelAsync() several times then wait them to be finished which might have duplicate WWWs.
 
+            if (m_LocalLoadingReferenceCount.ContainsKey(assetBundleName))
+            {
+                m_LocalLoadingReferenceCount[assetBundleName] += refCount;
+                return true;
+            }
+
+            if (m_RemoteLoadingReferencedCount.ContainsKey(assetBundleName))
+            {
+                m_RemoteLoadingReferencedCount[assetBundleName] += refCount;
+                return true;
+            }
 
             if (mode == LoadMode.Local || mode == LoadMode.LocalFirst || mode == LoadMode.Internal)
             {
-                if (m_LocalLoadingReferenceCount.ContainsKey(assetBundleName))
-                {
-                    m_LocalLoadingReferenceCount[assetBundleName] += refCount;
-                    return true;
-                }
                 m_LocalLoadingReferenceCount.Add(assetBundleName, refCount);
 
                 string url = Path.Combine(BaseLocalURL, assetBundleName);
@@ -452,11 +493,6 @@ namespace AssetBundles
             }
             else if (mode == LoadMode.Remote || mode == LoadMode.RemoteFirst)
             {
-                if (m_RemoteLoadingReferencedCount.ContainsKey(assetBundleName))
-                {
-                    m_RemoteLoadingReferencedCount[assetBundleName] += refCount;
-                    return true;
-                }
                 m_RemoteLoadingReferencedCount.Add(assetBundleName, refCount);
 
                 string url = Path.Combine(BaseDownloadingURL, assetBundleName);
@@ -645,11 +681,6 @@ namespace AssetBundles
                             m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle, refCount));
                         else
                             m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle));
-
-                        if (m_DownloadingErrors.ContainsKey(key))
-                            m_DownloadingErrors.Remove(key);
-
-                        Log(LogType.Info, string.Format("Load [{0}] success from [{1}]", bundle.name, BaseLocalURL));
 #if UNITY_EDITOR
                         isDirty = true;
 #endif
@@ -683,7 +714,9 @@ namespace AssetBundles
                     m_RemoteLoadingReferencedCount.Remove(key);
                     keysToRemove.Add(key);
 
-                    if (download.webRequest.isNetworkError || download.webRequest.isHttpError)
+                    AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(download.webRequest);
+
+                    if (bundle == null)
                     {
                         if (loadMode == LoadMode.RemoteFirst)
                         {
@@ -693,24 +726,12 @@ namespace AssetBundles
                         else
                         {
                             if (!m_DownloadingErrors.ContainsKey(key))
-                                m_DownloadingErrors.Add(key, string.Format("Failed downloading bundle {0} from {1}: {2}", key, download.webRequest.url, download.webRequest.error));
-                        }
-                        continue;
-                    }
-
-                    AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(download.webRequest);
-
-                    if (bundle == null)
-                    {
-                        if (loadMode == LoadMode.RemoteFirst)
-                        {
-                            Log(LogType.Info, string.Format("No asset in remote {0}, try local {1}: {2}", BaseDownloadingURL, BaseLocalURL, key));
-                            LoadAssetBundleInternal(key, m_AssetBundleManifest == null, LoadMode.Local, refCount);
-                        }
-                        else
-                        {
-                            if (!m_DownloadingErrors.ContainsKey(key))
-                                m_DownloadingErrors.Add(key, string.Format("{0} is not a valid asset bundle.", key));
+                            {
+                                if (download.webRequest.isNetworkError || download.webRequest.isHttpError)
+                                    m_DownloadingErrors.Add(key, string.Format("Failed downloading bundle {0} from {1}: {2}", key, download.webRequest.url, download.webRequest.error));
+                                else
+                                    m_DownloadingErrors.Add(key, string.Format("{0} is not a valid asset bundle.", key));
+                            }
                         }
                     }
                     else
@@ -719,11 +740,6 @@ namespace AssetBundles
                             m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle, refCount));
                         else
                             m_LoadedAssetBundles.Add(key, new LoadedAssetBundle(bundle));
-
-                        if (m_DownloadingErrors.ContainsKey(key))
-                            m_DownloadingErrors.Remove(key);
-
-                        Log(LogType.Info, string.Format("Load [{0}] success from [{1}]", bundle.name, BaseDownloadingURL));
 #if UNITY_EDITOR
                         isDirty = true;
 #endif
