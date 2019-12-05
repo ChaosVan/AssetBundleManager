@@ -246,6 +246,7 @@ namespace AssetBundles
 #if UNITY_EDITOR
             if (useSimulatePath && SimulateAssetBundleInEditor)
             {
+                assetBundle = assetBundle.Replace(Path.GetFileName(assetBundle), Path.GetFileNameWithoutExtension(assetBundle));
                 return HasAssetInternal(assetBundle);
             }
 #endif
@@ -376,6 +377,7 @@ namespace AssetBundles
             {
                 if (m_AssetBundleManifest == null)
                 {
+                    Log(LogType.Error, "Please load assetbundle " + assetBundleName + " after AssetBundleManager.Initialize()");
                     Log(LogType.Error, "Please initialize AssetBundleManifest by calling AssetBundleManager.Initialize()");
                     return;
                 }
@@ -766,12 +768,28 @@ namespace AssetBundles
             if (loadMode != LoadMode.Local)
                 UpdateRemote();
 
-            // Update all in progress operations, one by one
+            // Update all in progress operations, as smooth as possible
             if (m_InProgressOperations.Count > 0)
             {
-                if (!m_InProgressOperations[0].Update())
+                int count = m_InProgressOperations.Count;
+                float time = Time.realtimeSinceStartup;
+                int i = 0;
+                while (i < m_InProgressOperations.Count)
                 {
-                    m_InProgressOperations.RemoveAt(0);
+                    if (!m_InProgressOperations[i].Update())
+                    {
+                        m_InProgressOperations.RemoveAt(i);
+                    }
+                    else
+                    {
+                        i++;
+                    }
+
+                    if (Time.realtimeSinceStartup - time >= Time.fixedDeltaTime)
+                    {
+                        Log(LogType.Info, "Handled " + (count - m_InProgressOperations.Count));
+                        break;
+                    }
                 }
             }
 
