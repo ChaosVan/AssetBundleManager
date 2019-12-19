@@ -125,6 +125,11 @@ namespace AssetBundles
                 EditorUtility.ClearProgressBar();
                 EditorUtility.DisplayDialog("AssetBundleNamesSetting", success ? "Success" : errMsg, "Close");
             }
+            else
+            {
+                if (!success)
+                    throw new System.Exception(errMsg);
+            }
         }
 
         static public bool SetBundleName(string directory, string name, string variant, string[] ignores, bool separateFile, bool separateSubFolder, out string err)
