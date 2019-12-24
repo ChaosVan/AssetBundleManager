@@ -182,8 +182,10 @@ namespace AssetBundles
                 if (!importer.assetBundleVariant.Equals(variant))
                     importer.assetBundleVariant = variant;
 
+#if UNITY_PS4
                 if (assetBundleName.Split('/').Length >= 7)
-                    Debug.LogWarningFormat("{0}: folder depth exceeds the limit", assetBundleName);
+                    Debug.LogErrorFormat("{0}: folder depth exceeds the limit", assetBundleName);
+#endif
 
                 if (!Application.isBatchMode && EditorUtility.DisplayCancelableProgressBar("Set: " + assetBundleName, files[i], 1f * i / files.Length))
                 {
