@@ -183,7 +183,12 @@ namespace AssetBundles
         public static void SetLocalAssetBundleDirectory(string path)
         {
             if (string.IsNullOrEmpty(path))
-                BaseLocalURL = Application.persistentDataPath;
+            {
+                if (Application.isMobilePlatform || Application.isEditor)
+                    BaseLocalURL = Application.persistentDataPath + "/AssetBundles";
+                else
+                    BaseLocalURL = Application.dataPath + "/AssetBundles";
+            }
             else
                 BaseLocalURL = path;
 
@@ -218,7 +223,13 @@ namespace AssetBundles
             if (string.IsNullOrEmpty(url))
             {
                 if (loadMode != LoadMode.Local && loadMode != LoadMode.Internal)
+                {
                     Log(LogType.Error, "Development Server URL could not be found.");
+                    if (string.IsNullOrEmpty(BaseLocalURL))
+                        loadMode = LoadMode.Internal;
+                    else
+                        loadMode = LoadMode.Local;
+                }
             }
             else
             {
@@ -233,6 +244,12 @@ namespace AssetBundles
         /// <param name="assetBundle">Asset bundle name with variant.</param>
         public static bool HasAssetInternal(string assetBundle)
         {
+            if (string.IsNullOrEmpty(assetBundle))
+                return false;
+
+            if (!string.IsNullOrEmpty(Path.GetExtension(assetBundle)))
+                assetBundle = assetBundle.Replace(Path.GetFileName(assetBundle), Path.GetFileNameWithoutExtension(assetBundle));
+
             return m_AllAssetBundlesWithVariant.ContainsKey(assetBundle);
         }
 
@@ -243,13 +260,18 @@ namespace AssetBundles
         /// <param name="assetBundle">Asset bundle.</param>
         public static bool HasAssetInLocal(string assetBundle, bool useSimulatePath = false)
         {
+            if (string.IsNullOrEmpty(assetBundle))
+                return false;
+
 #if UNITY_EDITOR
             if (useSimulatePath && SimulateAssetBundleInEditor)
             {
-                assetBundle = assetBundle.Replace(Path.GetFileName(assetBundle), Path.GetFileNameWithoutExtension(assetBundle));
                 return HasAssetInternal(assetBundle);
             }
 #endif
+            if (string.IsNullOrEmpty(Path.GetExtension(assetBundle)))
+                assetBundle = RemapVariantName(assetBundle);
+
             string fullPath = Path.Combine(BaseLocalURL, assetBundle);
             if (File.Exists(fullPath))
                 return true;
