@@ -258,7 +258,7 @@ namespace AssetBundles
         /// </summary>
         /// <returns><c>true</c>, if asset in local was hased, <c>false</c> otherwise.</returns>
         /// <param name="assetBundle">Asset bundle.</param>
-        public static bool HasAssetInLocal(string assetBundle, bool useSimulatePath = false)
+        public static bool HasAssetInLocal(string assetBundle, bool useSimulatePath = false, bool isLoadingAssetBundleManifest = false)
         {
             if (string.IsNullOrEmpty(assetBundle))
                 return false;
@@ -269,7 +269,7 @@ namespace AssetBundles
                 return HasAssetInternal(assetBundle);
             }
 #endif
-            if (string.IsNullOrEmpty(Path.GetExtension(assetBundle)))
+            if (!isLoadingAssetBundleManifest && string.IsNullOrEmpty(Path.GetExtension(assetBundle)))
                 assetBundle = RemapVariantName(assetBundle);
 
             string fullPath = Path.Combine(BaseLocalURL, assetBundle);
@@ -501,7 +501,7 @@ namespace AssetBundles
 
                 string url = Path.Combine(BaseLocalURL, assetBundleName);
 
-                if (mode == LoadMode.Internal || !HasAssetInLocal(assetBundleName))
+                if (mode == LoadMode.Internal || !HasAssetInLocal(assetBundleName, false, isLoadingAssetBundleManifest))
                     url = Path.Combine(Utility.GetStreamingAssetsDirectory(), assetBundleName);
 
                 AssetBundleCreateRequest request = null;
