@@ -238,27 +238,24 @@ namespace AssetBundles
         }
 
         /// <summary>
-        /// Is assetbundle in manifest.
+        /// Is assetbundle in manifest. the asset bundle should not cotains extension
         /// </summary>
         /// <returns><c>true</c>, if asset bundle asset was hased, <c>false</c> otherwise.</returns>
         /// <param name="assetBundle">Asset bundle name with variant.</param>
-        public static bool HasAssetInternal(string assetBundle)
+        public static bool HasAssetBundleInternal(string assetBundle)
         {
             if (string.IsNullOrEmpty(assetBundle))
                 return false;
-
-            if (!string.IsNullOrEmpty(Path.GetExtension(assetBundle)))
-                assetBundle = assetBundle.Replace(Path.GetFileName(assetBundle), Path.GetFileNameWithoutExtension(assetBundle));
 
             return m_AllAssetBundlesWithVariant.ContainsKey(assetBundle);
         }
 
         /// <summary>
-        /// Is assetbundle file in local
+        /// Is assetbundle file in local. the asset bundle should not cotains extension
         /// </summary>
         /// <returns><c>true</c>, if asset in local was hased, <c>false</c> otherwise.</returns>
         /// <param name="assetBundle">Asset bundle.</param>
-        public static bool HasAssetInLocal(string assetBundle, bool useSimulatePath = false, bool isLoadingAssetBundleManifest = false)
+        public static bool HasAssetBundleInLocal(string assetBundle, bool useSimulatePath = false, bool isLoadingAssetBundleManifest = false)
         {
             if (string.IsNullOrEmpty(assetBundle))
                 return false;
@@ -266,10 +263,11 @@ namespace AssetBundles
 #if UNITY_EDITOR
             if (useSimulatePath && SimulateAssetBundleInEditor)
             {
-                return HasAssetInternal(assetBundle);
+                return HasAssetBundleInternal(assetBundle);
             }
 #endif
-            if (!isLoadingAssetBundleManifest && string.IsNullOrEmpty(Path.GetExtension(assetBundle)))
+
+            if (!isLoadingAssetBundleManifest)
                 assetBundle = RemapVariantName(assetBundle);
 
             string fullPath = Path.Combine(BaseLocalURL, assetBundle);
@@ -323,6 +321,12 @@ namespace AssetBundles
             }
 
             return bundle;
+        }
+
+        static public AssetBundleLoadManifestOperation ReloadManifest()
+        {
+            UnloadAssetBundle(Utility.GetPlatformName());
+            return Initialize();
         }
 
         static public AssetBundleLoadManifestOperation Initialize()
@@ -501,7 +505,7 @@ namespace AssetBundles
 
                 string url = Path.Combine(BaseLocalURL, assetBundleName);
 
-                if (mode == LoadMode.Internal || !HasAssetInLocal(assetBundleName, false, isLoadingAssetBundleManifest))
+                if (mode == LoadMode.Internal || !HasAssetBundleInLocal(assetBundleName, false, isLoadingAssetBundleManifest))
                     url = Path.Combine(Utility.GetStreamingAssetsDirectory(), assetBundleName);
 
                 AssetBundleCreateRequest request = null;

@@ -235,7 +235,7 @@ namespace AssetBundles
 
             if (m_Request != null && m_Request.isDone && m_Request.asset == null)
             {
-                m_DownloadingError = string.Format("There is no asset with name \"{0}\" in \"{1}\" with type {2}", assetName, assetBundleVariant, type);
+                m_DownloadingError = string.Format("There is no asset with name \"{0}\" and type {2} in \"{1}\"", assetName, assetBundleVariant, type);
             }
 
             return m_Request != null && m_Request.isDone;
@@ -346,7 +346,7 @@ namespace AssetBundles
 
                 if (m_SimulatedObject == null)
                 {
-                    m_DownloadingError = string.Format("There is no asset with name \"{0}\" in \"{1}\" with type {2}", assetName, assetBundleVariant, type);
+                    m_DownloadingError = string.Format("There is no asset with name \"{0}\" and type {2} in \"{1}\"", assetName, assetBundleVariant, type);
                 }
             }
             else
