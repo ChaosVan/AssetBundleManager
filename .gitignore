@@ -1,16 +1,2 @@
 # system file
 .DS_Store
-
-# unity
-/Library/
-/Logs/
-/obj/
-/Temp/
-/ProjectSettings/
-
-# vs code
-/.vs
-*.sln
-*.csproj
-
-/AssetBundles/
