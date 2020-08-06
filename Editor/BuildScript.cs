@@ -35,7 +35,7 @@ namespace AssetBundles
 
         static void ValidateAssetBundle(string bundleName, ref Dictionary<string, string> errors)
         {
-            string path = Utility.GetStreamingAssetsDirectory();
+            string path = Utility.GetStreamingAssetsPath();
             string bundlePath = Path.Combine(path, bundleName);
 
             try
@@ -51,7 +51,7 @@ namespace AssetBundles
 
         public static bool ValidateAssetBundles()
         {
-            string path = Utility.GetStreamingAssetsDirectory();
+            string path = Utility.GetStreamingAssetsPath();
             Debug.LogFormat("AssetBundle Path = {0}", path);
 
             Dictionary<string, string> errors = new Dictionary<string, string>();
