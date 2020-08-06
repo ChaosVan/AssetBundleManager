@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 using System.IO;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -10,7 +11,7 @@ namespace AssetBundles
     {
         public const string AssetBundlesOutputPath = "AssetBundles";
 
-        public static string GetStreamingAssetsPath()
+        public static string GetStreamingAssetsUrl()
         {
             if (Application.isEditor)
                 return "file://" + Path.Combine(System.Environment.CurrentDirectory.Replace("\\", "/"), AssetBundlesOutputPath, GetPlatformName()); // Use the build output folder directly.
@@ -20,7 +21,7 @@ namespace AssetBundles
                 return "file://" + Application.streamingAssetsPath;
         }
 
-        public static string GetStreamingAssetsDirectory()
+        public static string GetStreamingAssetsPath()
         {
             if (Application.isEditor)
                 return Path.Combine(System.Environment.CurrentDirectory.Replace("\\", "/"), AssetBundlesOutputPath, GetPlatformName()); // Use the build output folder directly.
@@ -28,6 +29,18 @@ namespace AssetBundles
                 return Application.dataPath + "!assets";
             else // todo console platform maybe can not run well
                 return Application.streamingAssetsPath;
+        }
+
+        public static void ParseAssetPath(string assetPath, bool isSeparatedAsset, out string assetName, out string assetBundle)
+        {
+            Assert.IsTrue(!string.IsNullOrEmpty(assetPath), "asset path is null or empty");
+            
+            assetName = Path.GetFileNameWithoutExtension(assetPath);
+            int length = assetPath.LastIndexOf(isSeparatedAsset ? '.' : '/');
+            if (length != -1)
+                assetBundle = assetPath.Substring(0, length).ToLower();
+            else
+                assetBundle = assetPath.ToLower();
         }
 
         public static string GetPlatformName()

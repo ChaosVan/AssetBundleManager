@@ -24,14 +24,14 @@ namespace AssetBundles
         [MenuItem("Assets/AssetBundles/Build AssetBundles")]
         static public void BuildAssetBundles()
         {
-            if (!BuildScript.BuildAssetBundles(BuildAssetBundleOptions.StrictMode | BuildAssetBundleOptions.ChunkBasedCompression))
+            if (!BuildScript.BuildAssetBundles(BuildAssetBundleOptions.StrictMode))
                 throw new System.Exception("Build assetbundles failed!!!");
         }
 
         [MenuItem("Assets/AssetBundles/Rebuild AssetBundles")]
         static public void RebuildAssetBundles()
         {
-            if (!BuildScript.BuildAssetBundles(BuildAssetBundleOptions.ForceRebuildAssetBundle | BuildAssetBundleOptions.StrictMode | BuildAssetBundleOptions.ChunkBasedCompression))
+            if (!BuildScript.BuildAssetBundles(BuildAssetBundleOptions.ForceRebuildAssetBundle | BuildAssetBundleOptions.StrictMode))
                 throw new System.Exception("Rebuild assetbundles failed!!!");
         }
 

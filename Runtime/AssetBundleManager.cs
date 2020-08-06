@@ -115,16 +115,30 @@ namespace AssetBundles
         private static bool isDirty;
 #endif
 
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo")]
+#endif
         public static LoadMode loadMode { get; set; } = LoadMode.Local;
 
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo")]
+#endif
         public static LogMode logMode { get; set; } = LogMode.All;
 
-        // The base downloading url which is used to generate the full downloading url with the assetBundle names.
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo"), PropertyTooltip("The base downloading url which is used to generate the full downloading url with the assetBundle names.")]
+#endif
         public static string BaseDownloadingURL { get; set; } = "";
 
-        public static string BaseLocalURL { get; set; } = "";
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo")]
+#endif
+        public static string BaseLocalPath { get; set; } = "";
 
         // Variants which is used to define the active variants.
+#if ODIN_INSPECTOR
+        [ShowInInspector, ShowIf("showOdinInfo")]
+#endif
         public static string[] ActiveVariants { get; set; } = { };
 
         // AssetBundleManifest object which can be used to load the dependecies and check suitable assetBundle variants.
@@ -173,26 +187,19 @@ namespace AssetBundles
                 }
             }
         }
-
-        private static void InitSimulateManifest()
-        {
-            string[] bundlesWithVariant = AssetDatabase.GetAllAssetBundleNames();
-        }
 #endif
 
-        public static void SetLocalAssetBundleDirectory(string path)
+        public static void SetLocalAssetBundlePath(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
                 if (Application.isMobilePlatform || Application.isEditor)
-                    BaseLocalURL = Application.persistentDataPath + "/AssetBundles";
+                    BaseLocalPath = Application.persistentDataPath + "/AssetBundles";
                 else
-                    BaseLocalURL = Application.dataPath + "/AssetBundles";
+                    BaseLocalPath = Application.dataPath + "/AssetBundles";
             }
             else
-                BaseLocalURL = path;
-
-            Log(LogType.Info, "SetLocalAssetBundleDirectory: " + BaseLocalURL);
+                BaseLocalPath = path;
         }
 
         public static void SetRemoteAssetBundleURL(string url)
@@ -201,13 +208,6 @@ namespace AssetBundles
                 SetDevelopmentAssetBundleServer();
             else
                 BaseDownloadingURL = url;
-
-            Log(LogType.Info, "SetRemoteAssetBundleURL: " + BaseDownloadingURL);
-        }
-
-        public static void SetSourceAssetBundleURL(string absolutePath)
-        {
-            BaseDownloadingURL = absolutePath;
         }
 
         public static void SetDevelopmentAssetBundleServer()
@@ -225,7 +225,7 @@ namespace AssetBundles
                 if (loadMode != LoadMode.Local && loadMode != LoadMode.Internal)
                 {
                     Log(LogType.Error, "Development Server URL could not be found.");
-                    if (string.IsNullOrEmpty(BaseLocalURL))
+                    if (string.IsNullOrEmpty(BaseLocalPath))
                         loadMode = LoadMode.Internal;
                     else
                         loadMode = LoadMode.Local;
@@ -235,6 +235,11 @@ namespace AssetBundles
             {
                 SetSourceAssetBundleURL(url);
             }
+        }
+
+        public static void SetSourceAssetBundleURL(string absolutePath)
+        {
+            BaseDownloadingURL = absolutePath;
         }
 
         /// <summary>
@@ -270,7 +275,7 @@ namespace AssetBundles
             if (!isLoadingAssetBundleManifest)
                 assetBundle = RemapVariantName(assetBundle);
 
-            string fullPath = Path.Combine(BaseLocalURL, assetBundle);
+            string fullPath = Path.Combine(BaseLocalPath, assetBundle);
             if (File.Exists(fullPath))
                 return true;
 
@@ -391,9 +396,8 @@ namespace AssetBundles
         // Load AssetBundle and its dependencies.
         static protected void LoadAssetBundle(string assetBundleName, bool isLoadingAssetBundleManifest = false)
         {
-            Log(LogType.Info, "Loading Asset Bundle " + (isLoadingAssetBundleManifest ? "Manifest: " : ": ") + assetBundleName);
-
 #if UNITY_EDITOR
+            Log(LogType.Info, "Loading Asset Bundle " + (isLoadingAssetBundleManifest ? "Manifest: " : ": ") + assetBundleName);
             // If we're in Editor simulation mode, we don't have to really load the assetBundle and its dependencies.
             if (SimulateAssetBundleInEditor)
                 return;
@@ -503,10 +507,10 @@ namespace AssetBundles
             {
                 m_LocalLoadingReferenceCount.Add(assetBundleName, refCount);
 
-                string url = Path.Combine(BaseLocalURL, assetBundleName);
+                string url = Path.Combine(BaseLocalPath, assetBundleName);
 
                 if (mode == LoadMode.Internal || !HasAssetBundleInLocal(assetBundleName, false, isLoadingAssetBundleManifest))
-                    url = Path.Combine(Utility.GetStreamingAssetsDirectory(), assetBundleName);
+                    url = Path.Combine(Utility.GetStreamingAssetsPath(), assetBundleName);
 
                 AssetBundleCreateRequest request = null;
 
@@ -626,7 +630,9 @@ namespace AssetBundles
 #endif
             }
 
+#if UNITY_EDITOR
             Log(LogType.Info, string.Format(UNLOADSTR, assetBundleName, bundle.m_ReferencedCount));
+#endif
         }
 
 //        static void OnRemoteCallback(UnityWebRequest request, string err, object userdata)
@@ -694,7 +700,9 @@ namespace AssetBundles
                     {
                         if (loadMode == LoadMode.LocalFirst)
                         {
-                            Log(LogType.Info, string.Format("No asset[{2}] in local {0}, try remote {1}", BaseLocalURL, BaseDownloadingURL, key));
+#if UNITY_EDITOR
+                            Log(LogType.Info, string.Format("No asset[{2}] in local {0}, try remote {1}", BaseLocalPath, BaseDownloadingURL, key));
+#endif
                             LoadAssetBundleInternal(key, m_AssetBundleManifest == null, LoadMode.Remote, refCount);
                         }
                         else
@@ -748,7 +756,9 @@ namespace AssetBundles
                     {
                         if (loadMode == LoadMode.RemoteFirst)
                         {
-                            Log(LogType.Info, string.Format("No asset[{2}] in remote {0}, try local {1}", BaseDownloadingURL, BaseLocalURL, key));
+#if UNITY_EDITOR
+                            Log(LogType.Info, string.Format("No asset[{2}] in remote {0}, try local {1}", BaseDownloadingURL, BaseLocalPath, key));
+#endif
                             LoadAssetBundleInternal(key, m_AssetBundleManifest == null, LoadMode.Local, refCount);
                         }
                         else
@@ -812,10 +822,7 @@ namespace AssetBundles
                     }
 
                     if (Time.realtimeSinceStartup - time >= Time.fixedDeltaTime)
-                    {
-                        Log(LogType.Info, "Handled " + (count - m_InProgressOperations.Count));
                         break;
-                    }
                 }
             }
 
@@ -843,10 +850,9 @@ namespace AssetBundles
         // Load asset from the given assetBundle.
         static public AssetBundleLoadAssetOperation LoadAssetAsync(string assetBundleName, string assetName, System.Type type)
         {
-            Log(LogType.Info, string.Format(LOADSTR, assetName, type, assetBundleName, Time.realtimeSinceStartup));
-
             AssetBundleLoadAssetOperation operation = null;
 #if UNITY_EDITOR
+            Log(LogType.Info, string.Format(LOADSTR, assetName, type, assetBundleName, Time.realtimeSinceStartup));
             if (SimulateAssetBundleInEditor)
             {
                 m_SimulateAssetBundleList.Add(assetBundleName);
@@ -870,10 +876,9 @@ namespace AssetBundles
         // Load level from the given assetBundle.
         static public AssetBundleLoadLevelOperation LoadLevelAsync(string assetBundleName, string levelName, bool isAdditive, bool allowSceneActivation)
         {
-            Log(LogType.Info, string.Format(LOADSTR, levelName, typeof(UnityEngine.SceneManagement.Scene), assetBundleName, Time.realtimeSinceStartup));
-
             AssetBundleLoadLevelOperation operation = null;
 #if UNITY_EDITOR
+            Log(LogType.Info, string.Format(LOADSTR, levelName, typeof(UnityEngine.SceneManagement.Scene), assetBundleName, Time.realtimeSinceStartup));
             if (SimulateAssetBundleInEditor)
             {
                 m_SimulateAssetBundleList.Add(assetBundleName);
