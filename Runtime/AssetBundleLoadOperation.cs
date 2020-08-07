@@ -123,9 +123,9 @@ namespace AssetBundles
             m_Request = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(levelPaths[0], new LoadSceneParameters(m_IsAdditive ? LoadSceneMode.Additive : LoadSceneMode.Single));
 #else
             if (m_IsAdditive)
-                m_Operation = UnityEditor.EditorApplication.LoadLevelAdditiveAsyncInPlayMode(levelPaths[0]);
+                m_Request = UnityEditor.EditorApplication.LoadLevelAdditiveAsyncInPlayMode(levelPaths[0]);
             else
-                m_Operation = UnityEditor.EditorApplication.LoadLevelAsyncInPlayMode(levelPaths[0]);
+                m_Request = UnityEditor.EditorApplication.LoadLevelAsyncInPlayMode(levelPaths[0]);
 #endif
 
             m_Request.allowSceneActivation = m_allowSceneActivation;
