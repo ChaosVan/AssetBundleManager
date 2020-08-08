@@ -82,25 +82,15 @@ namespace AssetBundles
         static Dictionary<string, UnityWebRequestAsyncOperation> m_UnityWebRequests = new Dictionary<string, UnityWebRequestAsyncOperation>();
         static Dictionary<string, AssetBundleCreateRequest> m_CreatingAssetBundles = new Dictionary<string, AssetBundleCreateRequest>();
 
-#if ODIN_INSPECTOR
-        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
-#endif
+
         static Dictionary<string, string> m_DownloadingErrors = new Dictionary<string, string>();
-#if ODIN_INSPECTOR
-        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
-#endif
         static List<AssetBundleLoadOperation> m_InProgressOperations = new List<AssetBundleLoadOperation>();
 #if ODIN_INSPECTOR
         [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
 #endif
         static Dictionary<string, string[]> m_Dependencies = new Dictionary<string, string[]>();
-#if ODIN_INSPECTOR
-        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
-#endif
+
         static Dictionary<string, int> m_LocalLoadingReferenceCount = new Dictionary<string, int>();
-#if ODIN_INSPECTOR
-        [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
-#endif
         static Dictionary<string, int> m_RemoteLoadingReferencedCount = new Dictionary<string, int>();
 #if ODIN_INSPECTOR
         [ShowInInspector, ShowIf("showOdinInfo"), DictionaryDrawerSettings(IsReadOnly = true)]
