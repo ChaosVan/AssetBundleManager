@@ -194,36 +194,36 @@ namespace AssetBundles
                 }
 
                 // handle spriteatlas ref folder
-                if (".spriteatlas".Equals(ext))
-                {
-                    SpriteAtlas atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(files[i]);
-                    Object[] objs = atlas.GetPackables();
-                    foreach (Object obj in objs)
-                    {
-                        string objPath = AssetDatabase.GetAssetPath(obj);
-                        if (Directory.Exists(objPath))
-                        {
-                            AssetImporter imp = AssetImporter.GetAtPath(objPath);
-                            if (!imp.assetBundleName.Equals(assetBundleName))
-                                imp.assetBundleName = assetBundleName;
-                            if (!imp.assetBundleVariant.Equals(variant))
-                                imp.assetBundleVariant = variant;
+                // if (".spriteatlas".Equals(ext))
+                // {
+                //     SpriteAtlas atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(files[i]);
+                //     Object[] objs = atlas.GetPackables();
+                //     foreach (Object obj in objs)
+                //     {
+                //         string objPath = AssetDatabase.GetAssetPath(obj);
+                //         if (Directory.Exists(objPath))
+                //         {
+                //             AssetImporter imp = AssetImporter.GetAtPath(objPath);
+                //             if (!imp.assetBundleName.Equals(assetBundleName))
+                //                 imp.assetBundleName = assetBundleName;
+                //             if (!imp.assetBundleVariant.Equals(variant))
+                //                 imp.assetBundleVariant = variant;
 
-                            if (!SetBundleName(objPath, assetBundleName, variant, ignores, false, false, out err)) return false;
-                        }
-                        else
-                        {
-                            AssetImporter imp = AssetImporter.GetAtPath(objPath);
-                            if (imp != null)
-                            {
-                                if (!imp.assetBundleName.Equals(assetBundleName))
-                                    imp.assetBundleName = assetBundleName;
-                                if (!imp.assetBundleVariant.Equals(variant))
-                                    imp.assetBundleVariant = variant;
-                            }
-                        }
-                    }
-                }
+                //             if (!SetBundleName(objPath, assetBundleName, variant, ignores, false, false, out err)) return false;
+                //         }
+                //         else
+                //         {
+                //             AssetImporter imp = AssetImporter.GetAtPath(objPath);
+                //             if (imp != null)
+                //             {
+                //                 if (!imp.assetBundleName.Equals(assetBundleName))
+                //                     imp.assetBundleName = assetBundleName;
+                //                 if (!imp.assetBundleVariant.Equals(variant))
+                //                     imp.assetBundleVariant = variant;
+                //             }
+                //         }
+                //     }
+                // }
             }
 
             // handle sub folders
