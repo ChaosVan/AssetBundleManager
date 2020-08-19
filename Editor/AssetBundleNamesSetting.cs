@@ -143,6 +143,12 @@ namespace AssetBundles
             // handle files
             for (int i = 0; i < files.Length; i++)
             {
+                if (!Application.isBatchMode && EditorUtility.DisplayCancelableProgressBar("Set: " + name, files[i], 1f * i / files.Length))
+                {
+                    err = "User Canceled";
+                    return false;
+                }
+
                 string ext = Path.GetExtension(files[i]);
                 if (".meta".Equals(ext) || ".cs".Equals(ext) || ".js".Equals(ext) || ".DS_Store".Equals(ext))
                     continue;
@@ -186,12 +192,6 @@ namespace AssetBundles
                 if (assetBundleName.Split('/').Length >= 7)
                     Debug.LogErrorFormat("{0}: folder depth exceeds the limit", assetBundleName);
 #endif
-
-                if (!Application.isBatchMode && EditorUtility.DisplayCancelableProgressBar("Set: " + assetBundleName, files[i], 1f * i / files.Length))
-                {
-                    err = "User Canceled";
-                    return false;
-                }
 
                 // handle spriteatlas ref folder
                 if (".spriteatlas".Equals(ext))
@@ -299,17 +299,17 @@ namespace AssetBundles
                 // handle files
                 for (int i = 0; i < files.Length; ++i)
                 {
+                    if (!Application.isBatchMode && EditorUtility.DisplayCancelableProgressBar("Clear assetbundle names", files[i], 1f * i / files.Length))
+                    {
+                        err = "User Canceled!";
+                        return false;
+                    }
+
                     string ext = Path.GetExtension(files[i]);
                     if (".meta".Equals(ext) || ".cs".Equals(ext) || ".js".Equals(ext) || ".DS_Store".Equals(ext))
                         continue;
 
                     if (!CleanAssetBundleNames(files[i], out err)) return false;
-
-                    if (!Application.isBatchMode && EditorUtility.DisplayCancelableProgressBar("Clear assetbundle names", directory, 1f * i / files.Length))
-                    {
-                        err = "User Canceled!";
-                        return false;
-                    }
                 }
 
                 // handle sub folders
