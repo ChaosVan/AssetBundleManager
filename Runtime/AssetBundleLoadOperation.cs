@@ -49,6 +49,8 @@ namespace AssetBundles
 
         public string AssetBundle => m_AssetBundleName;
         public string LevelName => m_LevelName;
+        public bool IsAdditive => m_IsAdditive;
+        public bool allowSceneActivation = m_allowSceneActivation;
 
         public AssetBundleLoadLevelOperation(string assetbundleName, string levelName, bool isAdditive, bool allowSceneActivation)
         {
