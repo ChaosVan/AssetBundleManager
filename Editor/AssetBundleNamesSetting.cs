@@ -83,7 +83,15 @@ namespace AssetBundles
             {
                 foreach (string ignore in ignores)
                 {
-                    if (fileName.Contains(ignore))
+                    if (ignore.StartsWith("!")) 
+                    {
+                        var word = ignore.Substring(1);
+                        if (!fileName.Contains(word))
+                        {
+                            return true;
+                        }
+                    }
+                    else if (fileName.Contains(ignore))
                     {
                         return true;
                     }
