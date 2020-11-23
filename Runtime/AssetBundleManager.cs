@@ -522,7 +522,7 @@ namespace AssetBundles
                 //if (isLoadingAssetBundleManifest)
                 //    WebRequestManager.Instance.LoadAssetBundle(url, OnRemoteCallback, (int)ThreadPriority.BelowNormal, assetBundleName);
                 //else
-                //WebRequestManager.Instance.LoadAssetBundle(url, m_AssetBundleManifest.GetAssetBundleHash(assetBundleName), OnRemoteCallback, (int)ThreadPriority.BelowNormal, assetBundleName);
+                //    WebRequestManager.Instance.LoadAssetBundle(url, m_AssetBundleManifest.GetAssetBundleHash(assetBundleName), OnRemoteCallback, (int)ThreadPriority.BelowNormal, assetBundleName);
 
                 UnityWebRequest download = null;
 
@@ -580,8 +580,8 @@ namespace AssetBundles
 
             //Log(LogType.Info, m_LoadedAssetBundles.Count + " assetbundle(s) in memory before unloading " + assetBundleName);
 
-            UnloadAssetBundleInternal(assetBundleName);
-            UnloadDependencies(assetBundleName);
+            if (UnloadAssetBundleInternal(assetBundleName))
+                UnloadDependencies(assetBundleName);
 
             if (m_DownloadingErrors.ContainsKey(assetBundleName))
                 m_DownloadingErrors.Remove(assetBundleName);
@@ -603,12 +603,12 @@ namespace AssetBundles
             m_Dependencies.Remove(assetBundleName);
         }
 
-        static protected void UnloadAssetBundleInternal(string assetBundleName)
+        static protected bool UnloadAssetBundleInternal(string assetBundleName)
         {
             string error;
             LoadedAssetBundle bundle = GetLoadedAssetBundle(assetBundleName, out error);
             if (bundle == null)
-                return;
+                return false;
 
             if (--bundle.m_ReferencedCount == 0)
             {
@@ -623,6 +623,8 @@ namespace AssetBundles
 #if UNITY_EDITOR
             Log(LogType.Info, string.Format(UNLOADSTR, assetBundleName, bundle.m_ReferencedCount));
 #endif
+
+            return bundle.m_ReferencedCount == 0;
         }
 
 //        static void OnRemoteCallback(UnityWebRequest request, string err, object userdata)
