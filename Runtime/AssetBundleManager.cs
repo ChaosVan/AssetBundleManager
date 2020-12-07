@@ -597,8 +597,7 @@ namespace AssetBundles
             // Loop dependencies.
             foreach (var dependency in dependencies)
             {
-                if (UnloadAssetBundleInternal(dependency))
-                    UnloadDependencies(dependency);
+                UnloadAssetBundleInternal(dependency);
             }
 
             m_Dependencies.Remove(assetBundleName);
