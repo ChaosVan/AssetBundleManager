@@ -407,7 +407,7 @@ namespace AssetBundles
             bool isAlreadyProcessed = LoadAssetBundleInternal(assetBundleName, isLoadingAssetBundleManifest, loadMode);
 
             // Load dependencies.
-            if (!isAlreadyProcessed && !isLoadingAssetBundleManifest)
+            if (!isLoadingAssetBundleManifest)
                 LoadDependencies(assetBundleName);
         }
 
@@ -522,7 +522,7 @@ namespace AssetBundles
                 //if (isLoadingAssetBundleManifest)
                 //    WebRequestManager.Instance.LoadAssetBundle(url, OnRemoteCallback, (int)ThreadPriority.BelowNormal, assetBundleName);
                 //else
-                //WebRequestManager.Instance.LoadAssetBundle(url, m_AssetBundleManifest.GetAssetBundleHash(assetBundleName), OnRemoteCallback, (int)ThreadPriority.BelowNormal, assetBundleName);
+                //    WebRequestManager.Instance.LoadAssetBundle(url, m_AssetBundleManifest.GetAssetBundleHash(assetBundleName), OnRemoteCallback, (int)ThreadPriority.BelowNormal, assetBundleName);
 
                 UnityWebRequest download = null;
 
@@ -559,7 +559,9 @@ namespace AssetBundles
                 dependencies[i] = RemapVariantName(dependencies[i]);
 
             // Record and load all dependencies.
-            m_Dependencies.Add(assetBundleName, dependencies);
+            if (!m_Dependencies.ContainsKey(assetBundleName))
+                m_Dependencies.Add(assetBundleName, dependencies);
+
             for (int i = 0; i < dependencies.Length; i++)
                 LoadAssetBundleInternal(dependencies[i], false, loadMode);
         }
@@ -599,8 +601,6 @@ namespace AssetBundles
             {
                 UnloadAssetBundleInternal(dependency);
             }
-
-            m_Dependencies.Remove(assetBundleName);
         }
 
         static protected void UnloadAssetBundleInternal(string assetBundleName)
