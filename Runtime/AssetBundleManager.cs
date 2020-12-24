@@ -582,8 +582,8 @@ namespace AssetBundles
 
             //Log(LogType.Info, m_LoadedAssetBundles.Count + " assetbundle(s) in memory before unloading " + assetBundleName);
 
-            UnloadAssetBundleInternal(assetBundleName);
             UnloadDependencies(assetBundleName);
+            UnloadAssetBundleInternal(assetBundleName);
 
             if (m_DownloadingErrors.ContainsKey(assetBundleName))
                 m_DownloadingErrors.Remove(assetBundleName);
@@ -605,24 +605,24 @@ namespace AssetBundles
 
         static protected void UnloadAssetBundleInternal(string assetBundleName)
         {
-            string error;
-            LoadedAssetBundle bundle = GetLoadedAssetBundle(assetBundleName, out error);
-            if (bundle == null)
-                return;
-
-            if (--bundle.m_ReferencedCount == 0)
+            if (m_LoadedAssetBundles.TryGetValue(assetBundleName, out LoadedAssetBundle bundle))
             {
-                bundle.m_AssetBundle.Unload(true);
-                m_LoadedAssetBundles.Remove(assetBundleName);
+                if (--bundle.m_ReferencedCount == 0)
+                {
+                    bundle.m_AssetBundle.Unload(true);
+                    m_LoadedAssetBundles.Remove(assetBundleName);
+                    if (m_Dependencies.ContainsKey(assetBundleName))
+                        m_Dependencies.Remove(assetBundleName);
 
 #if UNITY_EDITOR
-                isDirty = true;
+                    isDirty = true;
+#endif
+                }
+
+#if UNITY_EDITOR
+                Log(LogType.Info, string.Format(UNLOADSTR, assetBundleName, bundle.m_ReferencedCount));
 #endif
             }
-
-#if UNITY_EDITOR
-            Log(LogType.Info, string.Format(UNLOADSTR, assetBundleName, bundle.m_ReferencedCount));
-#endif
         }
 
 //        static void OnRemoteCallback(UnityWebRequest request, string err, object userdata)
