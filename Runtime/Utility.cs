@@ -7,40 +7,28 @@ using UnityEditor;
 
 namespace AssetBundles
 {
-    public class Utility
+    public static class Utility
     {
         public const string AssetBundlesOutputPath = "AssetBundles";
 
         public static string GetStreamingAssetsUrl()
         {
             if (Application.isEditor)
-                return "file://" + Path.Combine(System.Environment.CurrentDirectory.Replace("\\", "/"), AssetBundlesOutputPath, GetPlatformName()); // Use the build output folder directly.
+                return "file://" + Path.Combine(System.Environment.CurrentDirectory, AssetBundlesOutputPath, GetPlatformName()).Replace(Path.DirectorySeparatorChar.ToString(), "/"); // Use the build output folder directly.
             else if (Application.platform == RuntimePlatform.Android || Application.isConsolePlatform)
-                return Application.streamingAssetsPath;
+                return Application.streamingAssetsPath + "/" + GetPlatformName();
             else // standalone player and iphone player.
-                return "file://" + Application.streamingAssetsPath;
+                return "file://" + Application.streamingAssetsPath + "/" + GetPlatformName();
         }
 
         public static string GetStreamingAssetsPath()
         {
             if (Application.isEditor)
-                return Path.Combine(System.Environment.CurrentDirectory.Replace("\\", "/"), AssetBundlesOutputPath, GetPlatformName()); // Use the build output folder directly.
+                return Path.Combine(System.Environment.CurrentDirectory, AssetBundlesOutputPath, GetPlatformName()).Replace(Path.DirectorySeparatorChar.ToString(), "/"); // Use the build output folder directly.
             else if (Application.platform == RuntimePlatform.Android)
-                return Application.dataPath + "!assets";
+                return Application.dataPath + "!assets/" + GetPlatformName();
             else // todo console platform maybe can not run well
-                return Application.streamingAssetsPath;
-        }
-
-        public static void ParseAssetPath(string assetPath, bool isSeparatedAsset, out string assetName, out string assetBundle)
-        {
-            Assert.IsTrue(!string.IsNullOrEmpty(assetPath), "asset path is null or empty");
-            
-            assetName = Path.GetFileNameWithoutExtension(assetPath);
-            int length = assetPath.LastIndexOf(isSeparatedAsset ? '.' : '/');
-            if (length != -1)
-                assetBundle = assetPath.Substring(0, length).ToLower();
-            else
-                assetBundle = assetPath.ToLower();
+                return Application.streamingAssetsPath + "/" + GetPlatformName();
         }
 
         public static string GetPlatformName()

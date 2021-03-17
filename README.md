@@ -4,13 +4,13 @@ AssetBundleManager is improved from Unity AssetBundleManager.
 
 ## Support
 
-* Set assetbundle names by created `AssetBundleNamesSetting.asset` file;
-* Clean assetbundle names;
-* Build or Rebuild assetbundles;
-* Load assetbundles;
-* Load assetbundle variants;
-* Load in Local or Remote or LocalFirst or RemoteFirst;
-* Unload assetbundles by reference count.
+* Set assetbundle names by created `AssetBundleNamesSetting.asset` file
+* Clean assetbundle names
+* Build or Rebuild assetbundles
+* Load assetbundles
+* Load assetbundle variants
+* Load in Local or Remote or LocalFirst or RemoteFirst
+* Unload assetbundles by reference count
 * Compatible Asset Bundle Browser
 
 ## How to use this
@@ -27,3 +27,7 @@ The following line needs to be added to your `Packages/manifest.json` file in yo
 ```json
 "com.chaosvan.assetbundle-manager": "https://github.com/ChaosVan/AssetBundleManager.git#master",
 ```
+
+# Contact
+
+chaosvan@icloud.com

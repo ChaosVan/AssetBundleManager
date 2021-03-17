@@ -378,7 +378,7 @@ namespace AssetBundles
                 }
                 else
                 {
-                    Log(LogType.Error, bundlesWithVariant[i] + " has no variant name");
+                    Log(LogType.Warning, bundlesWithVariant[i] + " has no variant name");
                 }
             }
         }
@@ -420,7 +420,10 @@ namespace AssetBundles
 #if UNITY_EDITOR
             if (SimulateAssetBundleInEditor)
             {
-                return assetBundleName + "." + ActiveVariants[ActiveVariants.Length - 1];
+                if (ActiveVariants.Length > 0)
+                    return assetBundleName + "." + ActiveVariants[ActiveVariants.Length - 1];
+                else
+                    return assetBundleName;
             }
 #endif
 
@@ -452,7 +455,10 @@ namespace AssetBundles
             }
             else
             {
-                return assetBundleName + "." + ActiveVariants[ActiveVariants.Length - 1];
+                if (ActiveVariants.Length > 0)
+                    return assetBundleName + "." + ActiveVariants[ActiveVariants.Length - 1];
+                else
+                    return assetBundleName;
             }
 
         }
