@@ -19,6 +19,18 @@ namespace AssetBundles
     {
         public List<AssetBundleInfo> content;
 
+        Dictionary<string, AssetBundleInfo> dic;
+
+        public void Initialize()
+        {
+            if (content != null)
+            {
+                dic = new Dictionary<string, AssetBundleInfo>();
+                foreach (var info in content)
+                    dic[info.path] = info;
+            }
+        }
+
         public void Clear()
         {
             if (content != null)
@@ -39,13 +51,9 @@ namespace AssetBundles
                 content.Remove(info);
         }
 
-        public bool TryFind(string path, out AssetBundleInfo info)
+        public bool TryGet(string path, out AssetBundleInfo info)
         {
-            info = content.Find(x => x.path == path);
-            if (string.IsNullOrEmpty(info.path))
-                return false;
-
-            return true;
+            return dic.TryGetValue(path, out info);
         }
     }
 }
