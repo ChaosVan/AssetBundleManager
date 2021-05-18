@@ -82,7 +82,6 @@ namespace AssetBundles
         static Dictionary<string, UnityWebRequestAsyncOperation> m_UnityWebRequests = new Dictionary<string, UnityWebRequestAsyncOperation>();
         static Dictionary<string, AssetBundleCreateRequest> m_CreatingAssetBundles = new Dictionary<string, AssetBundleCreateRequest>();
 
-
         static Dictionary<string, string> m_DownloadingErrors = new Dictionary<string, string>();
         static List<AssetBundleLoadOperation> m_InProgressOperations = new List<AssetBundleLoadOperation>();
 #if ODIN_INSPECTOR
@@ -891,6 +890,14 @@ namespace AssetBundles
 
             m_InProgressOperations.Add(operation);
             return operation;
+        }
+        
+        public Dictionary<string, LoadedAssetBundle> LoadedAssetBundles 
+        {
+            get
+            {
+                return m_LoadedAssetBundles;
+            }
         }
 
         public const string LOADSTR = "Loading [{0}][{1}] from assetbundle [{2}] at realtime since startup [{3}]";

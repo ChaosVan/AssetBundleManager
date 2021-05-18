@@ -21,10 +21,11 @@ namespace AssetBundles
         [FolderPath]
 #endif
         public string directory;
-        public PackMode pack_mode;
+        public PackMode mode;
         public SeparatorType separator;
         public string ignore;
         public string comment;
+        public bool important;
 
         public string GetSeparator()
         {

@@ -18,10 +18,14 @@ namespace AssetBundles
     {
         public bool useLegacyMode = false;
 
+#if ODIN_INSPECTOR
         [ShowIf("useLegacyMode")]
+#endif
         public List<AssetBundlePathSetting> list;
 
+#if ODIN_INSPECTOR
         [HideIf("useLegacyMode")]
+#endif
         public List<AssetBundleGroupSetting> groups;
 
         private static AssetBundleConfig config = new AssetBundleConfig();
@@ -171,7 +175,7 @@ namespace AssetBundles
                     if (!CleanAssetBundleNames(files[i], out err)) return false;
 
                     // handle spriteatlas ref folder
-                    if (".spriteatlas".Equals(ext))
+                    if (".spriteatlas".Equals(ext) || ".spriteatlasv2".Equals(ext))
                     {
                         SpriteAtlas atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(files[i]);
                         Object[] objs = atlas.GetPackables();
@@ -257,7 +261,7 @@ namespace AssetBundles
                 SetFile(files[i], assetBundleName, variant);
 
                 // handle spriteatlas ref folder
-                if (".spriteatlas".Equals(ext))
+                if (".spriteatlas".Equals(ext) || ".spriteatlasv2".Equals(ext))
                 {
                     SpriteAtlas atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(files[i]);
                     Object[] objs = atlas.GetPackables();
@@ -340,7 +344,7 @@ namespace AssetBundles
                     continue;
 
                 string packName = "";
-                switch (group.pack_mode)
+                switch (group.mode)
                 {
                     case PackMode.PackTogether:
                         packName = group.directory.Replace("/", separator);
@@ -356,10 +360,10 @@ namespace AssetBundles
                         break;
                 }
 
-                SetFile(file, packName, group.variant);
+                SetFile(file, packName, group.variant, group.important);
 
                 // handle spriteatlas reference folder
-                if (".spriteatlas".Equals(ext))
+                if (".spriteatlas".Equals(ext) || ".spriteatlasv2".Equals(ext))
                 {
                     SpriteAtlas atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(file);
                     Object[] objs = atlas.GetPackables();
@@ -373,16 +377,17 @@ namespace AssetBundles
                                 name = packName,
                                 variant = group.variant,
                                 directory = objPath,
-                                pack_mode = PackMode.PackTogetherByGroup,
+                                mode = PackMode.PackTogetherByGroup,
                                 separator = group.separator,
                                 ignore = "!.png",
+                                important = false,
                             };
 
                             if (!SetBundleName(spriteGroup, out errMsg)) return false;
                         }
                         else
                         {
-                            SetFile(objPath, packName, group.variant);
+                            SetFile(objPath, packName, group.variant, true);
                         }
                     }
                 }
@@ -391,7 +396,7 @@ namespace AssetBundles
             return true;
         }
 
-        static void SetFile(string file, string assetBundleName, string assetBundleVariant)
+        static void SetFile(string file, string assetBundleName, string assetBundleVariant, bool important = false)
         {
             AssetImporter importer = AssetImporter.GetAtPath(file);
             if (importer != null)
@@ -410,13 +415,16 @@ namespace AssetBundles
                 if (!importer.assetBundleVariant.Equals(assetBundleVariant))
                     importer.assetBundleVariant = assetBundleVariant;
 
-                config.Add(new AssetBundleInfo
+                if (important) 
                 {
-                    path = file.Replace(Path.DirectorySeparatorChar.ToString(), "/"),
-                    bundle = assetBundleName,
-                    asset = Path.GetFileNameWithoutExtension(file),
-                    variant = assetBundleVariant,
-                });
+                    config.Add(new AssetBundleInfo
+                    {
+                        path = file.Replace(Path.DirectorySeparatorChar.ToString(), "/"),
+                        bundle = assetBundleName,
+                        asset = Path.GetFileNameWithoutExtension(file),
+                        variant = assetBundleVariant,
+                    });
+                }
             }
         }
 
